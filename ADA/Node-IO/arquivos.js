@@ -15,13 +15,16 @@ fs.readFile(filePath, {}, (erro, res) => {
     }
 
     const texto = res.toString()
-    const linhas = texto.split('\n')
+    console.log(texto)
+    const linhas = texto.split('\r')
+    console.log(linhas)
 
     // console.log(linha)
 
     const linhasEditadas = linhas.map((linha, index) => {
         return (` ${index} - ${linha} `)
     })
+    console.log(linhasEditadas)
 
     fs.writeFile(fileOutPath, linhasEditadas.join('\n'), (erro) => {
         if(erro){
