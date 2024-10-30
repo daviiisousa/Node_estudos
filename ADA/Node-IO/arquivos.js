@@ -1,5 +1,9 @@
 import path from 'path'
 import fs from 'fs'
+import env from 'dotenv'
+env.config()
+
+console.log(process.env.API_KEY)
 
 const filePath = path.join(process.cwd(), 'texte.txt')
 const fileOutPath = path.join(process.cwd(), 'texte2.txt')
