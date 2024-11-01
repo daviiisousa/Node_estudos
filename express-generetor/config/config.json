@@ -4,8 +4,7 @@
     "password": "2710",
     "database": "express",
     "host": "localhost",
-    "dialect": "mariadb",
-    "port": "3000"
+    "dialect": "mariadb"
   },
   "test": {
     "username": "root",
