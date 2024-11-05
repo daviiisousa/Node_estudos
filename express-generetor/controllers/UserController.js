@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User, Address } = require('../models');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require("dotenv").config()
@@ -60,8 +60,24 @@ const loginUser = async (req, res) => {
     }
 }
 
+const getUserWithAddres = async (req,res) => {
+    try {
+        const user = await User.findByPk( req.params.id, {
+            include: [{ model: Address, as: 'addresses' }]
+        });
+        if (!user) {
+            return res.status(404).json({ error: "Usuário não encontrado" })
+        }
+        res.json(user);
+
+    } catch (error) {
+        res.status(500).json({ error: "Erro ao buscar usuário com endereços" })
+    }
+}
+
 module.exports = {
     getAllUsers,
     createUser,
-    loginUser
+    loginUser,
+    getUserWithAddres
 }
