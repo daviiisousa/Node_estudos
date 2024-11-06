@@ -1,0 +1,44 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.fotoProduto{
+    width: 100%;
+    height: 100%;
+}
+
+.res{
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 100px;
+    justify-content: center;
+}
+
+.card{
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.171) ;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    width: 350px;
+    height: 500px;
+    transition: 0.5s;
+}
+
+.card:hover{
+    transform: scale(1.1);
+    margin:10px ;
+    transition: 0.5s;
+}
+
+.tituloProduto{
+    color: rgb(32, 29, 29);
+    margin: 10px 0px;
+    text-align: center;
+    width: 100%;
+}
