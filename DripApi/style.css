@@ -25,8 +25,8 @@
     align-items: center;
     padding: 10px;
     border-radius: 10px;
-    width: 350px;
-    height: 500px;
+    width: 500px;
+    height: 100%;
     transition: 0.5s;
 }
 
