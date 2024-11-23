@@ -68,6 +68,28 @@ app.post("/cadastrar", async (req, res) => {
       res.status(500).send("Erro no servidor");
     }
   });
+
+app.put("/produtos/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const { descricao } = req.body
+  
+    if(!descricao){
+      return res.status(400).json({mensagem: 'pfv prencha o campo'})
+    }
+
+    const result = await pool.query(
+      "UPDATE produtos_tecnologicos SET descricao = $1 WHERE id = $2 RETURNING *",
+      [descricao, id]
+    );
+    
+    res.status(201).json({messagem: 'produto atualizado', produto: result.rows[0]})
+  } catch (error) {
+    console.error("Erro ao cadastrar o produto:", error);
+    res.status(500).send("Erro no servidor");
+  }
+
+})
   
 
 app.listen(3000, () => {
