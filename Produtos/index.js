@@ -1,11 +1,11 @@
-const express = require("express");
-const { Pool } = require("pg");
+const express = require("express"); // chamando o express
+const { Pool } = require("pg"); // chamando o pool
 
-const app = express();
+const app = express(); // usando o express
 
-app.use(express.json());
+app.use(express.json()); //usando o express para json
 
-const pool = new Pool({
+const pool = new Pool({ // configuracao com o postgres
   user: "postgres",
   host: "localhost",
   database: "produtos",
@@ -69,6 +69,8 @@ app.post("/cadastrar", async (req, res) => {
     }
   });
 
+
+// atualiza o produto
 app.put("/produtos/:id", async (req, res) => {
   try {
     const { id } = req.params
@@ -85,10 +87,24 @@ app.put("/produtos/:id", async (req, res) => {
     
     res.status(201).json({messagem: 'produto atualizado', produto: result.rows[0]})
   } catch (error) {
-    console.error("Erro ao cadastrar o produto:", error);
+    console.error("Erro ao atualizar o produto:", error);
     res.status(500).send("Erro no servidor");
   }
 
+})
+
+//deleta o produto
+app.delete('/produtos/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const result = await pool.query('DELETE FROM produtos_tecnologicos WHERE id = $1', [id])
+    const products = await pool.query('SELECT * FROM produtos_tecnologicos')
+    res.status(200).json({messagem: 'produto deletado', produto: products.rows})
+  } catch (error) {
+    console.error("Erro ao deletar o produto:", error);
+    res.status(500).send("Erro no servidor");
+  }
 })
   
 
