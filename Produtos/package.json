@@ -9,9 +9,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "start": "nodemon ./src/server.js"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
