@@ -26,6 +26,16 @@ class FruitService {
     );
     return result.rows[0];
   }
+
+  async delete(id) {
+   const result = await db.query("DELETE FROM frutas WHERE id = $1 RETURNING *", [id])
+   return result.rows[0]
+  }
+
+  async atualizar(id){
+    const result = await db.query("UPDATE frutas WHERE id = $1 RETURNING *", [id])
+    return result.rows[0]
+  }
 }
 
 module.exports = new FruitService()

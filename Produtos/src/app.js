@@ -13,3 +13,5 @@ app.use("/produtos", ProductRouter);
 app.use('/frutas', FruitRouter)
 
 module.exports = app;
+
+
