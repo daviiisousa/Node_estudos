@@ -25,8 +25,6 @@ describe("ProdutoService", () => {
   });
 
   it("deve retornar todos os produtos", async () => {
-    // Definir o mock como uma lista de objetos
-
     pool.query.mockResolvedValueOnce({ rows: mockProdutos });
 
     const produtos = await ProdutoService.getAll();
@@ -37,7 +35,25 @@ describe("ProdutoService", () => {
   });
 
   it("deve deletar um item", async () => {
+    // Mock do item a ser deletado
+    const mockProduto = { id: 1, nome: "Produto Teste" };
 
-    const produto = await ProdutoService.delete(id)
+    // Simula a resposta do banco ao executar o DELETE
+    pool.query.mockResolvedValueOnce({ rows: [mockProduto] });
+
+    // Chama a função que será testada
+    const resultado = await ProdutoService.delete(1);
+
+    // Verifica se o retorno da função é o esperado
+    expect(resultado).toEqual(mockProduto);
+
+    // Verifica se a query foi chamada corretamente
+    expect(pool.query).toHaveBeenCalledWith(
+      "DELETE FROM produtos_tecnologicos WHERE id = $1 RETURNING *",
+      [1]
+    );
   });
+
+''
+
 });

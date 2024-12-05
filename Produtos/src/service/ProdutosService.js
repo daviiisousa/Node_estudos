@@ -24,7 +24,7 @@ class ProdutosService {
       "INSERT INTO produtos_tecnologicos (nome, descricao, preco, estoque, categoria) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [produto.nome, produto.descricao, produto.preco, produto.estoque, produto.categoria]
     );
-    return result.rows[0];
+    // return result.rows[0];
   }
 
   async update(id, data) {
@@ -36,11 +36,18 @@ class ProdutosService {
   }
 
   async delete(id) {
-    const result = await db.query("DELETE FROM produtos_tecnologicos WHERE id = $1 RETURNING *", [
-      id,
-    ]);
+    const result = await db.query(
+        "DELETE FROM produtos_tecnologicos WHERE id = $1 RETURNING *",
+        [id]
+    );
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
     return result.rows[0];
-  }
+}
+
 }
 
 module.exports = new ProdutosService();
