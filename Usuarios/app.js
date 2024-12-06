@@ -1,15 +1,24 @@
 const express = require("express");
 const app = express();
 app.use(express.json());
+const { body, validationResult } = require("express-validator");
 
-const { Pool } = require("pg");
-const db = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "usarios",
-  password: "2710",
-  port: "5432",
-});
+const db = require("./src/config/db");
+
+const validarUsuario = [
+  body("nome")
+    .notEmpty()
+    .withMessage("o campo nome nao pode ser vazil")
+    .trim()
+    .escape(),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("o campo nome esta incoreto"),
+  body("senha")
+    .isLength({ min: 6 })
+    .withMessage("o campo senha deve ter no minimo 6 caracteres"),
+];
 
 // GET Todos os usuários
 app.get("/usuarios", async (_req, res) => {
@@ -47,27 +56,26 @@ app.get("/usuarios/:id", async (req, res) => {
 });
 
 // POST Criar um novo usuário
-app.post("/usuarios", async (req, res) => {
+app.post("/usuarios", validarUsuario, async (req, res) => {
   try {
-    const { nome, email, senha } = req.body;
-
-    if (!nome || !email || !senha) {
-      return res
-        .status(400)
-        .json({ mensagem: "Todos os campos são obrigatórios" });
+    // Checar os erros de validação
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
+    const { nome, email, senha } = req.body;
+
+    // Inserir no banco de dados
     const usuarioCriado = await db.query(
       "INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3) RETURNING *",
       [nome, email, senha]
     );
 
-    res
-      .status(201)
-      .json({
-        mensagem: "Usuário criado com sucesso",
-        usuario: usuarioCriado.rows[0],
-      });
+    res.status(201).json({
+      mensagem: "Usuário criado com sucesso",
+      usuario: usuarioCriado.rows[0],
+    });
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     res.status(500).send("Erro no servidor");
@@ -88,27 +96,25 @@ app.delete("/usuarios/:id", async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
-    res
-      .status(200)
-      .json({
-        mensagem: "Usuário deletado com sucesso",
-        usuario: usuarioDeletado.rows[0],
-      });
+    res.status(204).json({
+      mensagem: "Usuário deletado com sucesso",
+      usuario: usuarioDeletado.rows[0],
+    });
   } catch (error) {
     console.error("Erro ao deletar usuário:", error);
     res.status(500).send("Erro no servidor");
   }
 });
 
-app.put("/usuario/:id", async (req, res) => {
+app.put("/usuario/:id", validarUsuario, async (req, res) => {
   try {
     const { id } = req.params;
     const { nome, email, senha } = req.body;
-    if (!nome || !email || !senha) {
-      return res
-        .status(400)
-        .json({ mensagem: "Todos os campos são obrigatórios" });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
     const usuario = await db.query(
       "UPDATE usuarios SET nome = $1, email = $2, senha = $3 WHERE id = $4 RETURNING *",
       [nome, email, senha, id]
@@ -118,7 +124,7 @@ app.put("/usuario/:id", async (req, res) => {
     }
     res
       .status(200)
-      .json({ mensagem: "sucesso ao atualizar", usario: usuario.rows[0] });
+      .json({ mensagem: "sucesso ao atualizar", usuario: usuario.rows[0] });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     res.status(500).send("Erro no servidor");
