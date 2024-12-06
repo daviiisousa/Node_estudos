@@ -46,7 +46,7 @@ const getUsuarioById = async (req, res) => {
 const createUsuario = async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
-    const senhaHasheada = await gerarHashSenha(senha)
+    const senhaHasheada = await gerarHashSenha(senha);
 
     // Inserir no banco de dados
     const usuarioCriado = await db.query(
@@ -94,16 +94,30 @@ const updateUsuario = async (req, res) => {
     const { id } = req.params;
     const { nome, email, senha } = req.body;
 
+    // Hash apenas se a senha for fornecida
+    const senhaHasheada = senha ? await gerarHashSenha(senha) : null;
+
     const usuario = await db.query(
-      "UPDATE usuarios SET nome = $1, email = $2, senha = $3 WHERE id = $4 RETURNING *",
-      [nome, email, senha, id]
+      `UPDATE usuarios 
+         SET 
+           nome = COALESCE($1, nome),
+           email = COALESCE($2, email),
+           senha = COALESCE($3, senha)
+         WHERE id = $4 
+         RETURNING *`,
+      [nome, email, senhaHasheada, id]
     );
+
     if (usuario.rows.length === 0) {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
+
     res
       .status(200)
-      .json({ mensagem: "sucesso ao atualizar", usuario: usuario.rows[0] });
+      .json({
+        mensagem: "Usuário atualizado com sucesso",
+        usuario: usuario.rows[0],
+      });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     res.status(500).send("Erro no servidor");
