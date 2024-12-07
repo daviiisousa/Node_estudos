@@ -7,13 +7,15 @@ const {
   createUsuario,
   deleteUsuario,
   updateUsuario,
-  loginUsuario
+  loginUsuario,
+  usuariosInativos
 } = require("../controller/userController");
 
 const { validarUsuario, validarLogin } = require("../validators/usuariosValidator");
 
 // Rotas de usuários
 router.get("/", getUsuarios);
+router.get("/adm", usuariosInativos)
 router.get("/:id", getUsuarioById);
 router.post("/", validarUsuario, createUsuario);
 router.post("/login", validarLogin, loginUsuario)
