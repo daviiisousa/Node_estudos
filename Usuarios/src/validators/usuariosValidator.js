@@ -6,4 +6,9 @@ const validarUsuario = [
   body("senha").isLength({ min: 6 }).withMessage("A senha deve ter pelo menos 6 caracteres"),
 ];
 
-module.exports = { validarUsuario };
+const validarLogin = [
+  body("email").isEmail().withMessage("O email deve ser válido").normalizeEmail(),
+  body("senha").isLength({ min: 6 }).withMessage("A senha deve ter pelo menos 6 caracteres"),
+]
+
+module.exports = { validarUsuario, validarLogin };

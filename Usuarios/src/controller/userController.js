@@ -139,10 +139,38 @@ const updateUsuario = async (req, res) => {
   }
 };
 
+const loginUsuario = async(req, res) => {
+  try {
+    const {email, senha} = req.body
+
+    //retorna um array do nosso banco de dados
+    const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email])
+    //aqui a gente pega esse array e acessa o abjeto dele por ser so um ele entende q ele esta no indice 0
+    const usuario = resultado.rows[0]
+
+    if (!usuario) {
+      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+    }
+    // Comparar a senha enviada com o hash armazenado
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) {
+      return res.status(401).json({ mensagem: "Senha incorreta" });
+    }
+
+    // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
+    res.status(200).json({ mensagem: "Login bem-sucedido", usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email } });
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+    res.status(500).send("Erro no servidor");
+  }
+
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioById,
   createUsuario,
   deleteUsuario,
   updateUsuario,
+  loginUsuario
 };
