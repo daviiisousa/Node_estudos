@@ -1,6 +1,8 @@
+const { validationResult } = require("express-validator");
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 
+//função para criptografar a senha 
 async function gerarHashSenha(senha) {
   const saltRounds = 10; // Número de rodadas de processamento
   const hash = await bcrypt.hash(senha, saltRounds);
@@ -46,6 +48,8 @@ const getUsuarioById = async (req, res) => {
 const createUsuario = async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
+
+    //deixar a senha criptografada
     const senhaHasheada = await gerarHashSenha(senha);
 
     // Inserir no banco de dados
@@ -53,6 +57,12 @@ const createUsuario = async (req, res) => {
       "INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3) RETURNING *",
       [nome, email, senhaHasheada]
     );
+
+    //faz uma validaçao se existe um erro nos dados enviado do corpo e o devolve
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     res.status(201).json({
       mensagem: "Usuário criado com sucesso",
@@ -94,9 +104,16 @@ const updateUsuario = async (req, res) => {
     const { id } = req.params;
     const { nome, email, senha } = req.body;
 
+    //faz uma validaçao se existe um erro nos dados enviado do corpo e o devolve
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     // Hash apenas se a senha for fornecida
     const senhaHasheada = senha ? await gerarHashSenha(senha) : null;
 
+    //o COALESCE atualiza o estado caso ele receba um novo valor, se n for passado um valor novo ele mantem o anterior. (o primeiro paramentro passado é onde vai entrar o novo valor, já o segunddo é o antigo)
     const usuario = await db.query(
       `UPDATE usuarios 
          SET 
@@ -112,12 +129,10 @@ const updateUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
-    res
-      .status(200)
-      .json({
-        mensagem: "Usuário atualizado com sucesso",
-        usuario: usuario.rows[0],
-      });
+    res.status(200).json({
+      mensagem: "Usuário atualizado com sucesso",
+      usuario: usuario.rows[0],
+    });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     res.status(500).send("Erro no servidor");
