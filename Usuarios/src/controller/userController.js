@@ -142,6 +142,10 @@ const updateUsuario = async (req, res) => {
 const loginUsuario = async(req, res) => {
   try {
     const {email, senha} = req.body
+    const error = validationResult(req)
+    if(!error.isEmpty){
+      return res.status(400).json({error: error.array()})
+    }
 
     //retorna um array do nosso banco de dados
     const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email])

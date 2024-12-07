@@ -16,7 +16,7 @@ const { validarUsuario, validarLogin } = require("../validators/usuariosValidato
 router.get("/", getUsuarios);
 router.get("/:id", getUsuarioById);
 router.post("/", validarUsuario, createUsuario);
-router.post("/login", loginUsuario)
+router.post("/login", validarLogin, loginUsuario)
 router.delete("/:id", deleteUsuario);
 router.put("/:id", validarUsuario, updateUsuario);
 
