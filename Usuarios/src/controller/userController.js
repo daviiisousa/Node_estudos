@@ -40,12 +40,10 @@ const usuariosInativos = async (req, res) => {
     if (usuariosInativos.rows.length === 0) {
       return res.status(404).send("nenhum usuario inativo encontrado");
     }
-    res
-      .status(200)
-      .json({
-        menssagem: "usuarios inativos",
-        inativos: usuariosInativos.rows,
-      });
+    res.status(200).json({
+      menssagem: "usuarios inativos",
+      inativos: usuariosInativos.rows,
+    });
   } catch (error) {
     console.error("Erro ao buscar usuario", error);
     res.status(500).send("Erro no servidor");
@@ -97,7 +95,6 @@ const createUsuario = async (req, res) => {
       [nome, email, senhaHasheada]
     );
 
-    
     res.status(201).json({
       mensagem: "Usuário criado com sucesso",
       usuario: usuarioCriado.rows[0],
@@ -119,21 +116,18 @@ const deleteUsuario = async (req, res) => {
       "SELECT * FROM usuarios WHERE id = $1",
       [id]
     );
-    // let usuarioActive = usuarioExistente.rows[0].active;
+
+    if (usuarioExistente.rows.length === 0) {
+      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+    }
 
     const usuarioDeletado = await db.query(
       "UPDATE usuarios SET active = $1 WHERE id = $2 RETURNING *",
       [false, id]
     );
 
-    if (usuarioExistente.rows.length === 0) {
-      return res.status(404).json({ mensagem: "Usuário não encontrado" });
-    }
-
     res.status(200).json({
-      mensagem: `Usuário ${
-        !usuarioActive ? "ativado" : "desativado"
-      } com sucesso`,
+      mensagem: `Usuário desativado com sucesso`,
       usuario: usuarioDeletado.rows[0],
     });
   } catch (error) {
@@ -186,7 +180,7 @@ const loginUsuario = async (req, res) => {
   try {
     const { email, senha } = req.body;
     const error = validationResult(req);
-    if (!error.isEmpty) {
+    if (!error.isEmpty()) {
       return res.status(400).json({ error: error.array() });
     }
 
@@ -207,11 +201,15 @@ const loginUsuario = async (req, res) => {
       return res.status(401).json({ mensagem: "Senha incorreta" });
     }
 
-    // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
-    res.status(200).json({
-      mensagem: "Login bem-sucedido",
-      usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
-    });
+    if (usuario.active === false) {
+      return res.status(400).json({ mensagem: "voce esta desativado" });
+    } else {
+      // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
+      res.status(200).json({
+        mensagem: "Login bem-sucedido",
+        usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+      });
+    }
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     res.status(500).send("Erro no servidor");
