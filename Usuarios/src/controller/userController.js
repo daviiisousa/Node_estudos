@@ -2,13 +2,6 @@ const { validationResult } = require("express-validator");
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 
-//função para criptografar a senha
-async function gerarHashSenha(senha) {
-  const saltRounds = 10; // Número de rodadas de processamento
-  const hash = await bcrypt.hash(senha, saltRounds);
-  return hash;
-}
-
 // GET Todos os usuários
 const getUsuarios = async (req, res) => {
   try {
@@ -87,12 +80,13 @@ const createUsuario = async (req, res) => {
     }
 
     //deixar a senha criptografada
-    const senhaHasheada = await gerarHashSenha(senha);
+    // const senhaHasheada = await gerarHashSenha(senha);
+    const hash = await bcrypt.hash(senha, 8);
 
     // Inserir no banco de dados
     const usuarioCriado = await db.query(
       "INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3) RETURNING *",
-      [nome, email, senhaHasheada]
+      [nome, email, hash]
     );
 
     res.status(201).json({
@@ -149,7 +143,7 @@ const updateUsuario = async (req, res) => {
     }
 
     // Hash apenas se a senha for fornecida
-    const senhaHasheada = senha ? await gerarHashSenha(senha) : null;
+    const senhaHasheada = senha ? await bcrypt.hash(senha, 8) : null;
 
     const usuario = await db.query(
       `UPDATE usuarios 
