@@ -13,12 +13,14 @@ const {
 
 const { validarUsuario, validarLogin } = require("../validators/usuariosValidator");
 
-// Rotas de usuários
+// Rotas publicas
+router.post("/", validarUsuario, createUsuario);
+router.post("/login", validarLogin, loginUsuario)
+
+//Rotas privadas
 router.get("/", getUsuarios);
 router.get("/adm", usuariosInativos)
 router.get("/:id", getUsuarioById);
-router.post("/", validarUsuario, createUsuario);
-router.post("/login", validarLogin, loginUsuario)
 router.delete("/:id", deleteUsuario);
 router.put("/:id", validarUsuario, updateUsuario);
 

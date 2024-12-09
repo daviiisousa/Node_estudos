@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require('dotenv').config()
 
 // GET Todos os usuários
 const getUsuarios = async (req, res) => {
@@ -91,7 +93,7 @@ const createUsuario = async (req, res) => {
 
     res.status(201).json({
       mensagem: "Usuário criado com sucesso",
-      usuario: usuarioCriado.rows[0],
+      usuario: usuarioCriado,
     });
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -197,18 +199,20 @@ const loginUsuario = async (req, res) => {
 
     if (usuario.active === false) {
       return res.status(400).json({ mensagem: "voce esta desativado" });
-    } else {
-      // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
-      res.status(200).json({
-        mensagem: "Login bem-sucedido",
-        usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
-      });
     }
+    const token = jwt.sign({id:usuario.id, nome: usuario.nome, email: usuario.email}, process.env.SECRET_KEY, {expiresIn: '1h'})
+    // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
+    res.status(200).json({
+      mensagem: "Login bem-sucedido",
+      token,
+      usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+    });
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     res.status(500).send("Erro no servidor");
   }
 };
+
 
 module.exports = {
   getUsuarios,
