@@ -3,8 +3,9 @@ const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require('dotenv').config()
+const {registrarNaBlacklist} = require('../middleware/authMiddleware')
 
-// GET Todos os usuários
+// GET Todos os usuários que estao ativo
 const getUsuarios = async (req, res) => {
   try {
     // Consultar apenas usuários ativos
@@ -57,6 +58,7 @@ const getUsuarioById = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
+    //verifica se usuario esta como desativado 
     if (usuario.rows[0].active === false) {
       res.status(400).json({ mensagem: "voce esta desativado" });
     } else {
@@ -82,7 +84,6 @@ const createUsuario = async (req, res) => {
     }
 
     //deixar a senha criptografada
-    // const senhaHasheada = await gerarHashSenha(senha);
     const hash = await bcrypt.hash(senha, 8);
 
     // Inserir no banco de dados
@@ -93,7 +94,7 @@ const createUsuario = async (req, res) => {
 
     res.status(201).json({
       mensagem: "Usuário criado com sucesso",
-      usuario: usuarioCriado,
+      usuario: usuarioCriado.rows[0],
     });
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -200,8 +201,8 @@ const loginUsuario = async (req, res) => {
     if (usuario.active === false) {
       return res.status(400).json({ mensagem: "voce esta desativado" });
     }
+    //gera o token 
     const token = jwt.sign({id:usuario.id, nome: usuario.nome, email: usuario.email}, process.env.SECRET_KEY, {expiresIn: '1h'})
-    // Retornar sucesso (aqui você pode incluir lógica para gerar um token JWT, por exemplo)
     res.status(200).json({
       mensagem: "Login bem-sucedido",
       token,
@@ -213,6 +214,19 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+const logoutUsuario = (req, res) => {
+  //aqui a gente vai no cabecalho da requisao e pega o token
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  if (!token) {
+    return res.status(400).json({ mensagem: "Token não fornecido" });
+  }
+  //aqui a gente alimenta a black list
+  registrarNaBlacklist(token);
+
+  res.status(200).json({ mensagem: "Logout realizado com sucesso" });
+};
+
 
 module.exports = {
   getUsuarios,
@@ -222,4 +236,5 @@ module.exports = {
   updateUsuario,
   loginUsuario,
   usuariosInativos,
+  logoutUsuario
 };

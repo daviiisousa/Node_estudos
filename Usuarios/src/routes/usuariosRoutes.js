@@ -8,8 +8,11 @@ const {
   deleteUsuario,
   updateUsuario,
   loginUsuario,
-  usuariosInativos
+  usuariosInativos,
+  logoutUsuario
 } = require("../controller/userController");
+
+const {autenticarToken} = require('../middleware/authMiddleware')
 
 const { validarUsuario, validarLogin } = require("../validators/usuariosValidator");
 
@@ -18,10 +21,11 @@ router.post("/", validarUsuario, createUsuario);
 router.post("/login", validarLogin, loginUsuario)
 
 //Rotas privadas
-router.get("/", getUsuarios);
-router.get("/adm", usuariosInativos)
-router.get("/:id", getUsuarioById);
-router.delete("/:id", deleteUsuario);
-router.put("/:id", validarUsuario, updateUsuario);
+router.get("/",autenticarToken, getUsuarios);
+router.get("/adm", autenticarToken, usuariosInativos)
+router.get("/:id",autenticarToken, getUsuarioById);
+router.delete("/:id",autenticarToken, deleteUsuario);
+router.put("/:id", autenticarToken, validarUsuario, updateUsuario);
+router.post('/logout', autenticarToken, logoutUsuario )
 
 module.exports = router;
