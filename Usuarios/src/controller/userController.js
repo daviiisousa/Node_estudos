@@ -37,7 +37,7 @@ const usuariosInativos = async (req, res) => {
       return res.status(404).send("nenhum usuario inativo encontrado");
     }
     res.status(200).json({
-      menssagem: "usuarios inativos",
+      mensagem: "usuarios inativos",
       inativos: usuariosInativos.rows,
     });
   } catch (error) {
